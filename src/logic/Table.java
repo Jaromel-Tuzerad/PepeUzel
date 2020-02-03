@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class Table {
 
-    enum moveDirection {
+    public enum moveDirection {
         UP,
         RIGHT,
         DOWN,
@@ -12,10 +12,12 @@ public class Table {
     }
 
     private ArrayList<Integer> table;
+    private int stepsMade;
 
     public Table(ArrayList<Integer> inputTable) throws InvalidArrayException {
         if(this.isValid(inputTable)) {
             this.table = (ArrayList<Integer>) inputTable.clone();
+            this.stepsMade = 0;
         } else {
             throw new InvalidArrayException("The input array does not contain the required numbers");
         }
@@ -69,4 +71,29 @@ public class Table {
         return output;
     }
 
+    public void move(moveDirection direction) throws InvalidArrayException {
+        int spaceIndex = getSpaceIndex();
+        switch(direction) {
+            case UP:
+                table.set(spaceIndex, table.get(spaceIndex + 3));
+                table.set(spaceIndex+3, 0);
+            case RIGHT:
+                table.set(spaceIndex, table.get(spaceIndex - 1));
+                table.set(spaceIndex-1, 0);
+            case DOWN:
+                table.set(spaceIndex, table.get(spaceIndex - 3));
+                table.set(spaceIndex-3, 0);
+            case LEFT:
+                table.set(spaceIndex, table.get(spaceIndex + 1));
+                table.set(spaceIndex+1, 0);
+        }
+    }
+
+    public ArrayList<Integer> getTable() {
+        return table;
+    }
+
+    public int getSteps() {
+        return stepsMade;
+    }
 }
