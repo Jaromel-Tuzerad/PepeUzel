@@ -12,12 +12,12 @@ public class Table {
     }
 
     private ArrayList<Integer> table;
-    private int stepsMade;
+    private int depth;
 
-    public Table(ArrayList<Integer> inputTable) throws InvalidArrayException {
+    public Table(ArrayList<Integer> inputTable, int depth) throws InvalidArrayException {
         if(this.isValid(inputTable)) {
             this.table = (ArrayList<Integer>) inputTable.clone();
-            this.stepsMade = 0;
+            this.depth = depth;
         } else {
             throw new InvalidArrayException("The input array does not contain the required numbers");
         }
@@ -41,13 +41,17 @@ public class Table {
         throw new InvalidArrayException("There is no space (0) in the input array");
     }
 
-    public ArrayList<moveDirection> getPossibleDirections() throws InvalidArrayException {
-        ArrayList<moveDirection> output = new ArrayList<moveDirection>();
+    public ArrayList<moveDirection> getPossibleDirections(moveDirection lastDirection) throws InvalidArrayException {
+        ArrayList<moveDirection> output = new ArrayList<>();
         int spaceIndex = getSpaceIndex();
 
         if(spaceIndex % 3 == 1) {
-            output.add(moveDirection.LEFT);
-            output.add(moveDirection.RIGHT);
+            if(lastDirection != moveDirection.RIGHT) {
+                output.add(moveDirection.LEFT);
+            }
+            if(lastDirection != moveDirection.LEFT) {
+                output.add(moveDirection.RIGHT);
+            }
         } else {
             if(spaceIndex % 3 == 0) {
                 output.add(moveDirection.LEFT);
@@ -60,11 +64,11 @@ public class Table {
             }
         }
 
-        if(spaceIndex <= 5) {
+        if(spaceIndex <= 5 && lastDirection != moveDirection.DOWN) {
             output.add(moveDirection.UP);
         }
 
-        if(spaceIndex >= 3) {
+        if(spaceIndex >= 3 && lastDirection != moveDirection.UP) {
             output.add(moveDirection.DOWN);
         }
 
@@ -75,25 +79,44 @@ public class Table {
         int spaceIndex = getSpaceIndex();
         switch(direction) {
             case UP:
-                table.set(spaceIndex, table.get(spaceIndex + 3));
+                table.set(spaceIndex, this.table.get(spaceIndex + 3));
                 table.set(spaceIndex+3, 0);
+                break;
             case RIGHT:
-                table.set(spaceIndex, table.get(spaceIndex - 1));
+                table.set(spaceIndex, this.table.get(spaceIndex - 1));
                 table.set(spaceIndex-1, 0);
+                break;
             case DOWN:
-                table.set(spaceIndex, table.get(spaceIndex - 3));
+                table.set(spaceIndex, this.table.get(spaceIndex - 3));
                 table.set(spaceIndex-3, 0);
+                break;
             case LEFT:
-                table.set(spaceIndex, table.get(spaceIndex + 1));
+                table.set(spaceIndex, this.table.get(spaceIndex + 1));
                 table.set(spaceIndex+1, 0);
+                break;
         }
+        this.depth++;
+    }
+
+    public Table cloneTable() throws InvalidArrayException {
+        return new Table(this.table, this.depth);
     }
 
     public ArrayList<Integer> getTable() {
         return table;
     }
 
-    public int getSteps() {
-        return stepsMade;
+    public int getDepth() {
+        return depth;
     }
+
+    public boolean isEqualTo(Table inputTable) {
+        for(int i = 0; i < inputTable.getTable().size(); i++) {
+            if(!this.table.get(i).equals(inputTable.getTable().get(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 }

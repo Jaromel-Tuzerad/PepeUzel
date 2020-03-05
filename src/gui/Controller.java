@@ -1,12 +1,14 @@
 package gui;
 
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import logic.InvalidArrayException;
+import logic.LogicResources;
 import logic.Table;
 
 import java.net.URL;
@@ -26,13 +28,19 @@ public class Controller implements Initializable {
     // TODO - Solves the puzzle by brute force when called
     private void bruteForce() {
         try {
-            setOutputGrid(new Table(getInputArray()));
+            ObservableList<Table> steps = listViewSteps.getItems();
+            steps.clear();
+            Table initialTable = new Table(getInputArray(), 0);
+            ArrayList<Table> tables = LogicResources.getStepsToSolution(initialTable);
+            steps.addAll(tables);
+            listViewSteps.setItems(steps);
+            setOutputGrid(tables.get(tables.size()-1));
         } catch(InvalidArrayException e) {
             callAlert("Error", "Invalid input", e.getMessage());
         }
     }
 
-    public static void callAlert(String title, String header, String content) {
+    private void callAlert(String title, String header, String content) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
         alert.setHeaderText(header);
@@ -67,19 +75,18 @@ public class Controller implements Initializable {
         listViewSteps.setCellFactory(lv -> new ListCell<Table>() {
             @Override
             public void updateItem(Table table, boolean empty) {
-                super.updateItem(table, empty);
-                if (empty) {
-                    setText(null);
-                } else {
-                    StringBuilder text = new StringBuilder("Step " + table.getSteps() + " (");
-                    for(int i = 0; i < table.getTable().size()-1; i++) {
-                        text.append(table.getTable().get(i)).append(", ");
-                    }
-                    text.append(table.getTable().get(8)).append(")");
-                    setText(text.toString());
+            super.updateItem(table, empty);
+            if (empty) {
+                setText(null);
+            } else {
+                StringBuilder text = new StringBuilder("Step " + table.getDepth() + " (");
+                for(int i = 0; i < table.getTable().size()-1; i++) {
+                    text.append(table.getTable().get(i)).append(", ");
                 }
+                text.append(table.getTable().get(table.getTable().size()-1)).append(")");
+                setText(text.toString());
+            }
             }
         });
     }
-
 }
